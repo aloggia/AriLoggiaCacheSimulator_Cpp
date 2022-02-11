@@ -5,7 +5,11 @@
 #include "Block.h"
 
 Block::Block(unsigned int size) {
-
+    tag = -1;
+    this->size = size;
+    mem.reserve(size);
+    isDirty = true;
+    isValid = false;
 }
 
 int Block::getTag() const {
@@ -33,13 +37,13 @@ void Block::setValid(bool newFlag) {
 }
 
 unsigned int Block::readByte(unsigned int addr) {
-    tuple<unsigned int, unsigned int> addrComponents = addressAsTuple(addr, size);
+    tuple<unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr, size);
     unsigned int offset = get<1>(addrComponents);
     return mem[offset];
 }
 
 void Block::writeByte(unsigned int addr, unsigned int byte) {
-    tuple<unsigned int, unsigned int> addrComponents = addressAsTuple(addr, size);
+    tuple<unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr, size);
     unsigned int offset = get<1>(addrComponents);
     mem[offset] = byte;
 }
@@ -51,7 +55,7 @@ unsigned int Block::readWord(unsigned int addr) {
 
 void Block::writeWord(unsigned int addr, unsigned int word) {
     for (int i = 0; i <= 3; i++) {
-        writeByte(addr, extractBits(word, 8, 8*i));
+        writeByte(addr, GlobalFunctions::extractBits(word, 8, 8*i));
         addr += 1;
     }
 }

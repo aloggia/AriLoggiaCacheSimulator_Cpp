@@ -9,9 +9,9 @@ using namespace std;
 
 class GlobalFunctions {
 public:
-    tuple<unsigned int, unsigned int> addressAsTuple(unsigned int addr, unsigned int blockckSize);
+    static tuple<unsigned int, unsigned int> addressAsTuple(unsigned int addr, unsigned int blockSize);
     static unsigned int extractBits(unsigned int word, int numBits, int startPos);
-    unsigned int alignAddress(unsigned int addr);
+    static unsigned int alignAddress(unsigned int addr);
 };
 
 #endif //ARILOGGIACACHESIMULATOR_CPP_GLOBALFUNCTIONS_H
