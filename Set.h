@@ -1,0 +1,14 @@
+//
+// Created by alogg on 2/11/2022.
+//
+
+#ifndef ARILOGGIACACHESIMULATOR_CPP_SET_H
+#define ARILOGGIACACHESIMULATOR_CPP_SET_H
+
+
+class Set {
+
+};
+
+
+#endif //ARILOGGIACACHESIMULATOR_CPP_SET_H
