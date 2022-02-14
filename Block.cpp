@@ -59,3 +59,11 @@ void Block::writeWord(unsigned int addr, unsigned int word) {
         addr += 1;
     }
 }
+
+unsigned int Block::getSize() const {
+    return size;
+}
+
+void Block::setSize(unsigned int size) {
+    this->size = size;
+}

@@ -21,3 +21,5 @@ tuple<unsigned int, unsigned int> GlobalFunctions::addressAsTuple(unsigned int a
 unsigned int GlobalFunctions::alignAddress(unsigned int addr) {
     return addr - (addr % 4);
 }
+
+

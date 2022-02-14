@@ -4,16 +4,18 @@
 
 #ifndef ARILOGGIACACHESIMULATOR_CPP_CACHE_H
 #define ARILOGGIACACHESIMULATOR_CPP_CACHE_H
-#include "Set.h"
+
 #include "Memory.h"
 #include "Block.h"
+#include "Set.h"
 
 #include <vector>
+
 using namespace std;
 
 class Cache {
 private:
-    int blockSize;
+    static int blockSize;
     int numSets;
     vector<Set> sets;
     bool isWriteBack;
@@ -31,6 +33,12 @@ public:
     unsigned int readWord(unsigned int addr);
 
     void writeWord(unsigned int addr, unsigned int word);
+
+    static tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem);
+
+    void moveIn(unsigned int addr, const Memory& mem);
+
+    int getBlockNumber(unsigned int addr);
 };
 
 

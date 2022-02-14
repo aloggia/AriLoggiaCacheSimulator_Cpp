@@ -28,6 +28,9 @@ public:
     bool getValid() const;
     void setValid(bool newFlag);
 
+    unsigned int getSize() const;
+    void setSize(unsigned int size);
+
     unsigned int readByte(unsigned int addr);
     void writeByte(unsigned int addr, unsigned int byte);
 

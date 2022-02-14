@@ -5,6 +5,7 @@
 #ifndef ARILOGGIACACHESIMULATOR_CPP_MEMORY_H
 #define ARILOGGIACACHESIMULATOR_CPP_MEMORY_H
 #include "GlobalFunctions.h"
+#include "Block.h"
 #include <vector>
 #include <cmath>
 
@@ -25,6 +26,8 @@ public:
     void writeWord(unsigned int addr, unsigned int word);
 
     int getSize() const;
+
+
 
 
 

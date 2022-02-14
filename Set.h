@@ -5,6 +5,7 @@
 #ifndef ARILOGGIACACHESIMULATOR_CPP_SET_H
 #define ARILOGGIACACHESIMULATOR_CPP_SET_H
 #include "Block.h"
+#include "Memory.h"
 
 #include <vector>
 
@@ -19,7 +20,6 @@ private:
 public:
     Set(int associativity, int blockSize);
 
-    void moveIn(Block moveBlock);
 
     bool checkTag(int tagToCheck);
 
