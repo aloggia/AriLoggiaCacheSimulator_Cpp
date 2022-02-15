@@ -4,7 +4,7 @@
 
 #include "Block.h"
 
-Block::Block(unsigned int size) {
+Block::Block(int size) {
     tag = -1;
     this->size = size;
     mem.reserve(size);

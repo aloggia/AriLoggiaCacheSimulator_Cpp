@@ -17,7 +17,7 @@ private:
     bool isDirty;
     bool isValid;
 public:
-    Block(unsigned int size);
+    Block(int size);
 
     int getTag() const;
     void setTag(int new_tag);

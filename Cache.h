@@ -15,7 +15,7 @@ using namespace std;
 
 class Cache {
 private:
-    static int blockSize;
+    int blockSize;
     int numSets;
     vector<Set> sets;
     bool isWriteBack;
@@ -26,7 +26,7 @@ public:
 
     unsigned int readWordFromCache(unsigned int addr);
 
-    void rightWordToCache(unsigned int addr, unsigned int word);
+    void writeWordToCache(unsigned int addr, unsigned int word);
 
     Set& getSet(int setNum);
 
@@ -34,11 +34,13 @@ public:
 
     void writeWord(unsigned int addr, unsigned int word);
 
-    static tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem);
+    tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem) const;
 
     void moveIn(unsigned int addr, const Memory& mem);
 
     int getBlockNumber(unsigned int addr);
+
+    Memory& getMemory();
 };
 
 
