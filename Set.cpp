@@ -21,10 +21,13 @@ bool Set::checkTag(int tagToCheck) {
 }
 
 Block& Set::getBlock(unsigned int addr) {
-    // WIll need to update
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    for(auto & i : tagQueue) {
-        if (i == -1) {
+    for (int i = 0; i < tagQueue.size(); i++) {
+        if (tagQueue[i] == -1) {
+            for (int j = 0; j < i; j++) {
+                tagQueue[i] = tagQueue[i-1];
+            }
+            tagQueue[0] = get<0>(addrComponents);
             return blocks[i];
         }
     }
