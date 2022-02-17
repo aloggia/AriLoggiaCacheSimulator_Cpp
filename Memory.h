@@ -19,10 +19,10 @@ private:
 public:
     Memory();
 
-    unsigned int readByte(unsigned int addr) const;
+    [[nodiscard]] unsigned int readByte(unsigned int addr) const;
     void writeByte(unsigned int addr, unsigned int byte);
 
-    unsigned int readWord(unsigned int addr) const;
+    [[nodiscard]] unsigned int readWord(unsigned int addr) const;
     void writeWord(unsigned int addr, unsigned int word);
 
     int getSize() const;

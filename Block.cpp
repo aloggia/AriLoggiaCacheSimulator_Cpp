@@ -37,15 +37,13 @@ void Block::setValid(bool newFlag) {
 }
 
 unsigned int Block::readByte(unsigned int addr) {
-    tuple<unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr, size);
-    unsigned int offset = get<1>(addrComponents);
-    return mem[offset];
+    tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    return mem[get<2>(addrComponents)];
 }
 
 void Block::writeByte(unsigned int addr, unsigned int byte) {
-    tuple<unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr, size);
-    unsigned int offset = get<1>(addrComponents);
-    mem[offset] = byte;
+    tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    mem[get<2>(addrComponents)] = byte;
 }
 
 unsigned int Block::readWord(unsigned int addr) {

@@ -5,8 +5,12 @@
 #ifndef ARILOGGIACACHESIMULATOR_CPP_BLOCK_H
 #define ARILOGGIACACHESIMULATOR_CPP_BLOCK_H
 #include "GlobalFunctions.h"
+#include "common.h"
 #include <vector>
 #include <tuple>
+#include <iostream>
+#include <ostream>
+
 using namespace std;
 
 class Block {

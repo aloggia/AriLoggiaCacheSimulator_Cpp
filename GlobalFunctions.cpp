@@ -7,19 +7,33 @@ unsigned int GlobalFunctions::extractBits(unsigned int word, int numBits, int st
     return (((1 << numBits) - 1) & (word >> (startPos)));
 }
 
-tuple<unsigned int, unsigned int> GlobalFunctions::addressAsTuple(unsigned int addr, unsigned int blockSize) {
-    //(tag, offset)
-    if (blockSize == 32) {
-        return make_tuple(extractBits(addr, 16-5, 5), extractBits(addr, 5, 0));
-    } else if (blockSize == 64) {
-        return make_tuple(extractBits(addr, 16-6, 6), extractBits(addr, 6, 0));
-    } else if (blockSize == 128) {
-        return make_tuple(extractBits(addr, 16-7, 7), extractBits(addr, 7, 0));
+tuple<unsigned int, unsigned int, unsigned int> GlobalFunctions::addressAsTuple(unsigned int addr) {
+    // tag, index, offset
+    // calculate the offset
+    if (ASSOCIATIVITY == 1) {
+        return make_tuple(extractBits(addr, maxNumBits(BLOCK_SIZE), maxNumBits(BLOCK_SIZE)),
+                          0,
+                          extractBits(addr, maxNumBits(BLOCK_SIZE), 0));
+    } else {
+        return make_tuple(extractBits(addr, maxNumBits(BLOCK_SIZE) + maxNumBits((CACHE_SIZE / BLOCK_SIZE) / ASSOCIATIVITY), maxNumBits(BLOCK_SIZE)),
+                          extractBits(addr, maxNumBits((CACHE_SIZE / BLOCK_SIZE) / ASSOCIATIVITY), maxNumBits(BLOCK_SIZE)-1),
+                          extractBits(addr, maxNumBits(BLOCK_SIZE), 0));
     }
-    return make_tuple(0,0);
 }
 unsigned int GlobalFunctions::alignAddress(unsigned int addr) {
     return addr - (addr % 4);
 }
 
+int GlobalFunctions::maxNumBits(int value) {
+    if (value == 1) {
+        return 1;
+    } else {
+        int neededBits = 0;
+        while (value != 1) {
+            value = value / 2;
+            neededBits += 1;
+        }
+        return neededBits;
+    }
+}
 

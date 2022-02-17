@@ -6,6 +6,7 @@
 #define ARILOGGIACACHESIMULATOR_CPP_SET_H
 #include "Block.h"
 #include "Memory.h"
+#include "GlobalFunctions.h"
 
 #include <vector>
 
@@ -23,7 +24,7 @@ public:
 
     bool checkTag(int tagToCheck);
 
-    Block& getBlock(int blockNumber);
+    Block& getBlock(unsigned int addr);
 };
 
 

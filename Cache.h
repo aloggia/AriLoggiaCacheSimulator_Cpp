@@ -10,6 +10,8 @@
 #include "Set.h"
 
 #include <vector>
+#include <ostream>
+#include <iostream>
 
 using namespace std;
 
@@ -34,11 +36,11 @@ public:
 
     void writeWord(unsigned int addr, unsigned int word);
 
-    tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem) const;
+    [[nodiscard]] tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem) const;
 
     void moveIn(unsigned int addr, const Memory& mem);
 
-    int getBlockNumber(unsigned int addr);
+    [[nodiscard]] int getBlockNumber(unsigned int addr) const;
 
     Memory& getMemory();
 };
