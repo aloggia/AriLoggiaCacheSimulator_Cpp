@@ -39,7 +39,7 @@ public:
 
     [[nodiscard]] tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem) const;
 
-    void moveIn(unsigned int addr, const Memory& mem);
+    void moveIn(unsigned int addr);
 
     [[nodiscard]] int getBlockNumber(unsigned int addr) const;
 

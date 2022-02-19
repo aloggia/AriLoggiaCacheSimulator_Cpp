@@ -6,6 +6,7 @@
 
 
 Set::Set() {
+    // loop a total of ASSOIATIVITY times, adding a new block to the set and a new value to the tag queue
     for (int i = 1; i <= ASSOCIATIVITY; i++) {
         blocks.emplace_back(Block());
         tagQueue.emplace_back(-1);
@@ -15,11 +16,16 @@ Set::Set() {
 
 bool Set::checkTag(int tagToCheck) {
     // Will need to update to deal with associative caching
-    // lmao this is v wrong
+    // this is v wrong
     return tagQueue[0] == tagToCheck;
 }
 
 Block& Set::getBlock(unsigned int addr) {
+    // Returns a refrence to a speific block
+    // Updates the tag queue when a block is accessesed
+    // Calling this function is equivilent to a block access, so we'll need to update the tag queue
+    // due to principle of locality
+    // The tag queue updating is a bit broken right now though
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
     for (int i = 0; i < tagQueue.size(); i++) {
         if (tagQueue[i] == -1) {

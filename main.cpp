@@ -15,9 +15,10 @@ bool WRITE_BACK;
 
 
 int main() {
+    // Set values of global variables
     CACHE_SIZE = 1024;
     BLOCK_SIZE = 64;
-    ASSOCIATIVITY = 4;
+    ASSOCIATIVITY = 1;
     WRITE_BACK = true;
     Cache cache;
 
