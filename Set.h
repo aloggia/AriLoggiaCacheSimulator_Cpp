@@ -14,12 +14,11 @@ using namespace std;
 
 class Set {
 private:
-    int associativity;
     vector<int> tagQueue;
     vector<Block> blocks;
 
 public:
-    Set(int associativity, int blockSize);
+    Set();
 
 
     bool checkTag(int tagToCheck);

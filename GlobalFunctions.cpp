@@ -9,7 +9,7 @@ unsigned int GlobalFunctions::extractBits(unsigned int word, int numBits, int st
 
 tuple<unsigned int, unsigned int, unsigned int> GlobalFunctions::addressAsTuple(unsigned int addr) {
     // tag, index, offset
-    // calculate the offset
+    // If associativity = 1, then all blocks will always have an index of 0
     if (ASSOCIATIVITY == 1) {
         return make_tuple(extractBits(addr, maxNumBits(BLOCK_SIZE), maxNumBits(BLOCK_SIZE)),
                           0,
@@ -26,8 +26,10 @@ unsigned int GlobalFunctions::alignAddress(unsigned int addr) {
 
 int GlobalFunctions::maxNumBits(int value) {
     if (value == 1) {
+        // edge case
         return 1;
     } else {
+        // Repeatedly dividde the value by 2, counting how many times it can be divided by 2, than return that value
         int neededBits = 0;
         while (value != 1) {
             value = value / 2;

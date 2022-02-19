@@ -8,6 +8,7 @@
 #include "Memory.h"
 #include "Block.h"
 #include "Set.h"
+#include "common.h"
 
 #include <vector>
 #include <ostream>
@@ -24,7 +25,7 @@ private:
     Memory memory;
 
 public:
-    Cache(int cacheSize, unsigned int blockSize, int associativity, bool writeBack);
+    Cache();
 
     unsigned int readWordFromCache(unsigned int addr);
 

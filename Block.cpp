@@ -4,10 +4,9 @@
 
 #include "Block.h"
 
-Block::Block(int size) {
+Block::Block() {
     tag = -1;
-    this->size = size;
-    mem.reserve(size);
+    mem.reserve(BLOCK_SIZE);
     isDirty = true;
     isValid = false;
 }
@@ -58,10 +57,7 @@ void Block::writeWord(unsigned int addr, unsigned int word) {
     }
 }
 
-unsigned int Block::getSize() const {
-    return size;
+unsigned int Block::getSize() {
+    return BLOCK_SIZE;
 }
 
-void Block::setSize(unsigned int size) {
-    this->size = size;
-}

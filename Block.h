@@ -16,12 +16,11 @@ using namespace std;
 class Block {
 private:
     int tag;
-    unsigned int size;
     vector<unsigned int> mem;
     bool isDirty;
     bool isValid;
 public:
-    Block(int size);
+    Block();
 
     int getTag() const;
     void setTag(int new_tag);
@@ -32,8 +31,7 @@ public:
     bool getValid() const;
     void setValid(bool newFlag);
 
-    unsigned int getSize() const;
-    void setSize(unsigned int size);
+    static unsigned int getSize() ;
 
     unsigned int readByte(unsigned int addr);
     void writeByte(unsigned int addr, unsigned int byte);

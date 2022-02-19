@@ -4,17 +4,17 @@
 
 #include "Cache.h"
 
-Cache::Cache(int cacheSize, unsigned int blockSize, int associativity, bool writeBack) {
+Cache::Cache() {
     int numBlocks = 0;
-    numBlocks = cacheSize / blockSize;
+    numBlocks = CACHE_SIZE / BLOCK_SIZE;
     int numSets = 0;
-    numSets = numBlocks / associativity;
-    this->blockSize = blockSize;
+    numSets = numBlocks / ASSOCIATIVITY;
+    this->blockSize = BLOCK_SIZE;
     this->numSets = numSets;
-    isWriteBack = writeBack;
+    isWriteBack = WRITE_BACK;
     memory = Memory();
     for (int i = 0; i < numSets; i++) {
-        sets.emplace_back(Set(associativity, blockSize));
+        sets.emplace_back(Set());
     }
 }
 
@@ -128,7 +128,6 @@ void Cache::moveIn(unsigned int addr, const Memory &mem) {
      * The index: which uniquly identifies the set a block can be put in
      * Offset: The unique distance that each address has from the top of a block
      */
-    sets[getBlockNumber(addr) % numSets].getBlock(addr).setSize(blockSize);
     sets[getBlockNumber(addr) % numSets].getBlock(addr).setTag(get<0>(addrComponents));
     sets[getBlockNumber(addr) % numSets].getBlock(addr).setDirty(false);
     sets[getBlockNumber(addr) % numSets].getBlock(addr).setValid(true);

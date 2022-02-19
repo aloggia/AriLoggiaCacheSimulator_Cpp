@@ -5,10 +5,9 @@
 #include "Set.h"
 
 
-Set::Set(int associativity, int blockSize) {
-    this->associativity = associativity;
-    for (int i = 1; i <= associativity; i++) {
-        blocks.emplace_back(Block(blockSize));
+Set::Set() {
+    for (int i = 1; i <= ASSOCIATIVITY; i++) {
+        blocks.emplace_back(Block());
         tagQueue.emplace_back(-1);
     }
 }
