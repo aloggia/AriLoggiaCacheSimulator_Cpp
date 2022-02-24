@@ -19,22 +19,43 @@ bool Set::checkTag(int tagToCheck) {
     // this is v wrong
     return tagQueue[0] == tagToCheck;
 }
-
 Block& Set::getBlock(unsigned int addr) {
-    // Returns a refrence to a speific block
+    // Returns a refrence to a specific block
     // Updates the tag queue when a block is accessesed
     // Calling this function is equivilent to a block access, so we'll need to update the tag queue
     // due to principle of locality
     // The tag queue updating is a bit broken right now though
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    for (int i = 0; i < tagQueue.size(); i++) {
-        if (tagQueue[i] == -1) {
-            for (int j = 0; j < i; j++) {
-                tagQueue[i] = tagQueue[i-1];
-            }
-            tagQueue[0] = get<0>(addrComponents);
-            return blocks[i];
+    /*if (numBlocksInSet() == 0) {
+        tagQueue[0] = get<0>(addrComponents);
+    } else {
+        tagQueue.pop_back();
+        tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
+    }
+     */
+    for (Block& i : blocks) {
+        if(i.getTag() == get<0>(addrComponents)) {
+            return i;
         }
     }
-    return blocks[0];
+    // If the requested block is not in cache, return the oldest block
+    // Do this because on a miss a block will need to be brought into the cache, so by returning the oldest block
+    // We tell the program: "Overwrite this block
+    /*
+     * for tag in tagQueue
+     * if a tag == -1:
+     * Find that block and return it
+     * if all blocks filled:
+     *
+     */
+}
+
+int Set::numBlocksInSet() const {
+    int numBlocks = 0;
+    for (auto & i : tagQueue) {
+        if (i != -1) {
+            numBlocks += 1;
+        }
+    }
+    return numBlocks;
 }

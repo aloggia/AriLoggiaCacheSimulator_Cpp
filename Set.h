@@ -7,6 +7,7 @@
 #include "Block.h"
 #include "Memory.h"
 #include "GlobalFunctions.h"
+#include <optional>
 
 #include <vector>
 
@@ -24,6 +25,8 @@ public:
     bool checkTag(int tagToCheck);
 
     Block& getBlock(unsigned int addr);
+
+    int numBlocksInSet() const;
 };
 
 
