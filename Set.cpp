@@ -26,28 +26,63 @@ Block& Set::getBlock(unsigned int addr) {
     // due to principle of locality
     // The tag queue updating is a bit broken right now though
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    /*if (numBlocksInSet() == 0) {
-        tagQueue[0] = get<0>(addrComponents);
-    } else {
+    bool containsBlocks = false;
+    int numBlocksInSet = 0;
+    bool blockIsInSet = false;
+    int blockInSetIndex = 0;
+    for (int i = 0; i < tagQueue.size(); ++i) {
+        if (tagQueue[i] != -1) {
+            containsBlocks = true;
+            numBlocksInSet += 1;
+        }
+        if (tagQueue[i] == get<0>(addrComponents)) {
+            blockIsInSet = true;
+            blockInSetIndex = i;
+        }
+    }
+    if (!containsBlocks) {
+        // Edge case of empty set
         tagQueue.pop_back();
         tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
     }
-     */
-    for (Block& i : blocks) {
-        if(i.getTag() == get<0>(addrComponents)) {
-            return i;
+    else if (numBlocksInSet == tagQueue.size()) {
+        // Edge case of full set
+        if (blockIsInSet) {
+            // Block is in the set, so erase that block from tagQueue and push it onto tag queue at index 0
+            tagQueue.erase(tagQueue.begin() + blockInSetIndex);
+            tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
+        } else {
+            // block is not in the set, so erase the least recently used tag and push the new tag
+            tagQueue.pop_back();
+            tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
+        }
+    } else {
+        // Case of some blocks in set
+        if (blockIsInSet) {
+            // block is in set, but there are empty sets
+            // So we just erase the tag from tagQueue and push it into tagQueue at the beggining
+            tagQueue.erase(tagQueue.begin() + blockInSetIndex);
+            tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
+        } else {
+            // Block is not in set & there are empty sets
+            tagQueue.pop_back();
+            tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
         }
     }
-    // If the requested block is not in cache, return the oldest block
-    // Do this because on a miss a block will need to be brought into the cache, so by returning the oldest block
-    // We tell the program: "Overwrite this block
-    /*
-     * for tag in tagQueue
-     * if a tag == -1:
-     * Find that block and return it
-     * if all blocks filled:
-     *
-     */
+
+
+    // If the block is in the set, return that block
+    int blockToReturnIndex = 0;
+    for (int i = 0; i < blocks.size(); ++ i) {
+        if (blocks[i].getTag() == get<0>(addrComponents)) {
+            return blocks[i];
+        }
+        if (blocks[i].getTag() == -1) {
+            blockToReturnIndex = i;
+        }
+    }
+    // If block is not in the set return the first block we find with index -1
+    return blocks[blockToReturnIndex];
 }
 
 int Set::numBlocksInSet() const {
