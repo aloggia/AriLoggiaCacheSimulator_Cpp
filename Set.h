@@ -28,6 +28,8 @@ public:
 
     int numBlocksInSet() const;
 
+    int getIndexInSet(unsigned int addr) const;
+
     vector<int> getTagQueue() const;
 };
 

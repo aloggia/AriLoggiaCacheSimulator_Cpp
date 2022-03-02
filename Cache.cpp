@@ -72,7 +72,7 @@ void Cache::readWord(unsigned int addr) {
             wordRead = readWordFromCache(addr, isHit);
             cout << "hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             for (int & i : tagQueue) {
@@ -88,7 +88,7 @@ void Cache::readWord(unsigned int addr) {
             wordRead = readWordFromCache(addr, isHit);
             cout << "miss ";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             moveIn(addr);
@@ -112,7 +112,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // Write back cache, so write word to cache and set the dirty flag as true
             cout << " hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             writeWordToCache(addr, word);
@@ -126,7 +126,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // Write through cache, write to block and memory
             cout << " hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             writeWordToCache(addr, word);
@@ -145,7 +145,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // if writeback cache, write to cache and set as dirty
             cout << " miss";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             writeWordToCache(addr, word);
@@ -159,7 +159,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // write through cache, write to both cache and memory
             cout << " miss";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << "]" << endl;
             cout << "[ ";

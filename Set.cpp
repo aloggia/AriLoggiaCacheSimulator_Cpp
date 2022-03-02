@@ -92,3 +92,12 @@ int Set::numBlocksInSet() const {
 vector<int> Set::getTagQueue() const {
     return tagQueue;
 }
+
+int Set::getIndexInSet(unsigned int addr) const {
+    tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    for (int i = 0; i < blocks.size(); ++i) {
+        if(i == get<1>(addrComponents)) {
+            return i;
+        }
+    }
+}
