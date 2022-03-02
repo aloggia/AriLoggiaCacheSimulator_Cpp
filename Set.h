@@ -27,6 +27,8 @@ public:
     Block& getBlock(unsigned int addr);
 
     int numBlocksInSet() const;
+
+    vector<int> getTagQueue() const;
 };
 
 

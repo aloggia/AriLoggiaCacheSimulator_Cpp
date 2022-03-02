@@ -27,13 +27,13 @@ private:
 public:
     Cache();
 
-    unsigned int readWordFromCache(unsigned int addr);
+    unsigned int readWordFromCache(unsigned int addr, bool isHit);
 
     void writeWordToCache(unsigned int addr, unsigned int word);
 
     Set& getSet(int setNum);
 
-    unsigned int readWord(unsigned int addr);
+    void readWord(unsigned int addr);
 
     void writeWord(unsigned int addr, unsigned int word);
 

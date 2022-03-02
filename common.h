@@ -7,6 +7,7 @@
 extern int CACHE_SIZE;
 extern int BLOCK_SIZE;
 extern int ASSOCIATIVITY;
+extern int TAG_LENGTH;
 extern bool WRITE_BACK;
 
 

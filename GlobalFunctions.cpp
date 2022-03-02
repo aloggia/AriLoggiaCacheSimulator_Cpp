@@ -11,13 +11,16 @@ tuple<unsigned int, unsigned int, unsigned int> GlobalFunctions::addressAsTuple(
     // tag, index, offset
     // If associativity = 1, then all blocks will always have an index of 0
     if (ASSOCIATIVITY == 1) {
-        return make_tuple(extractBits(addr, maxNumBits(BLOCK_SIZE), maxNumBits(BLOCK_SIZE)),
+        int offsetBits = (16 - TAG_LENGTH);
+        return make_tuple(extractBits(addr, TAG_LENGTH, offsetBits + 1),
                           0,
-                          extractBits(addr, maxNumBits(BLOCK_SIZE), 0));
+                          extractBits(addr, offsetBits, 0));
     } else {
-        return make_tuple(extractBits(addr, maxNumBits(BLOCK_SIZE) + maxNumBits((CACHE_SIZE / BLOCK_SIZE) / ASSOCIATIVITY), maxNumBits(BLOCK_SIZE)),
-                          extractBits(addr, maxNumBits((CACHE_SIZE / BLOCK_SIZE) / ASSOCIATIVITY), maxNumBits(BLOCK_SIZE)-1),
-                          extractBits(addr, maxNumBits(BLOCK_SIZE), 0));
+        int indexBits = maxNumBits(ASSOCIATIVITY);
+        int offsetBits = (16 - TAG_LENGTH) - indexBits;
+        return make_tuple(extractBits(addr, TAG_LENGTH, offsetBits + indexBits),
+                          extractBits(addr, indexBits, offsetBits),
+                          extractBits(addr, offsetBits, 0));
     }
 }
 unsigned int GlobalFunctions::alignAddress(unsigned int addr) {

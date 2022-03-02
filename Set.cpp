@@ -86,11 +86,9 @@ Block& Set::getBlock(unsigned int addr) {
 }
 
 int Set::numBlocksInSet() const {
-    int numBlocks = 0;
-    for (auto & i : tagQueue) {
-        if (i != -1) {
-            numBlocks += 1;
-        }
-    }
-    return numBlocks;
+    return blocks.size();
+}
+
+vector<int> Set::getTagQueue() const {
+    return tagQueue;
 }

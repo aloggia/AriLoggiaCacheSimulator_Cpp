@@ -18,15 +18,25 @@ Cache::Cache() {
     }
 }
 
-unsigned int Cache::readWordFromCache(unsigned int addr) {
+unsigned int Cache::readWordFromCache(unsigned int addr, bool isHit) {
     // metadata for the block
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
     tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr, memory);
     // output formatting
-    cout << " word=" << getSet(get<1>(addrComponents)).getBlock(addr).readWord(addr) << " (" <<
-         get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
-    // read the word from cache
-    return getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr);
+    if (isHit) {
+        // word we are reading is in the cache
+        cout << " word=" << getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr) << " (" <<
+             get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
+        // read the word from cache
+        return getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr);
+    } else {
+        // word we are reading is not in the cache, so move that block into the cache
+        moveIn(addr);
+        cout << " word=" << getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr) << " (" <<
+             get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
+        // read the word from cache
+        return getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr);
+    }
 
 }
 
@@ -46,30 +56,54 @@ Set &Cache::getSet(int setNum) {
     return sets[setNum];
 }
 
-unsigned int Cache::readWord(unsigned int addr) {
+void Cache::readWord(unsigned int addr) {
     // 3 tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    // TODO: This will always hold the wrong tagQueue
+    vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
+    bool isHit;
+    int wordRead = 0;
     cout << "read ";
         if ((sets[getBlockNumber(addr) % numSets].getBlock(addr).getTag() == get<0>(addrComponents)) &&
             sets[getBlockNumber(addr) % numSets].getBlock(addr).getValid()) {
             // Cache hit
             // Read word
+            isHit = true;
+            wordRead = readWordFromCache(addr, isHit);
             cout << "hit";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
-            return readWordFromCache(addr);
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
+
         } else {
             // Cache miss
             //write new block into cache, then read from it
-            cout << "miss";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
+            isHit = false;
             moveIn(addr);
-            return readWordFromCache(addr);
+            wordRead = readWordFromCache(addr, isHit);
+            cout << "miss ";
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
+            moveIn(addr);
+            cout << "[ ";
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
         }
 }
 
 void Cache::writeWord(unsigned int addr, unsigned int word) {
     // Create tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
     cout << "write";
     if ((sets[getBlockNumber(addr) % numSets].getBlock(addr).getTag() == get<0>(addrComponents)) &&
         (sets[getBlockNumber(addr) % numSets].getBlock(addr).getValid())) {
@@ -77,14 +111,30 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
         if (isWriteBack) {
             // Write back cache, so write word to cache and set the dirty flag as true
             cout << " hit";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
             writeWordToCache(addr, word);
+            cout << "[ ";
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
             sets[getBlockNumber(addr) % numSets].getBlock(addr).setDirty(true);
         } else {
             // Write through cache, write to block and memory
             cout << " hit";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
             writeWordToCache(addr, word);
+            cout << "[ ";
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
             memory.writeWord(addr, word);
         }
     } else {
@@ -94,13 +144,29 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
         if (isWriteBack) {
             // if writeback cache, write to cache and set as dirty
             cout << " miss";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
             writeWordToCache(addr, word);
+            cout << "[ ";
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
             sets[getBlockNumber(addr) % numSets].getBlock(addr).setDirty(true);
         } else {
             // write through cache, write to both cache and memory
             cout << " miss";
-            cout << "[addr=" << addr << " index=0 tag=" << get<0>(addrComponents);
+            cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            cout << " block_index=" << getBlockNumber(addr) % numSets;
+            cout << " tag=" << get<0>(addrComponents);
+            cout << "]" << endl;
+            cout << "[ ";
+            for (int & i : tagQueue) {
+                cout << to_string(i) << " ";
+            }
+            cout << "]" << endl;
             writeWordToCache(addr, word);
             memory.writeWord(addr, word);
         }
