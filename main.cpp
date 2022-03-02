@@ -36,6 +36,7 @@ int main() {
     cache.getMemory().writeWord(3212,3212);
     cache.getMemory().writeWord(8324, 8324);
 
+
     cache.readWord(1152);
     cache.readWord(2176);
     cache.readWord(3200);

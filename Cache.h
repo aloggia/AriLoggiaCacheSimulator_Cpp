@@ -37,7 +37,7 @@ public:
 
     void writeWord(unsigned int addr, unsigned int word);
 
-    [[nodiscard]] tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr, const Memory& mem) const;
+    [[nodiscard]] tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr) const;
 
     void moveIn(unsigned int addr);
 

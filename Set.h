@@ -26,11 +26,13 @@ public:
 
     Block& getBlock(unsigned int addr);
 
-    int numBlocksInSet() const;
+    int getNumBlocksInSet() const;
 
     int getIndexInSet(unsigned int addr) const;
 
     vector<int> getTagQueue() const;
+
+    void updateQueue(unsigned int addr);
 };
 
 

@@ -7,7 +7,6 @@
 Cache::Cache() {
     int numBlocks = 0;
     numBlocks = CACHE_SIZE / BLOCK_SIZE;
-    int numSets = 0;
     numSets = numBlocks / ASSOCIATIVITY;
     this->blockSize = BLOCK_SIZE;
     this->numSets = numSets;
@@ -21,19 +20,14 @@ Cache::Cache() {
 unsigned int Cache::readWordFromCache(unsigned int addr, bool isHit) {
     // metadata for the block
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr, memory);
     // output formatting
     if (isHit) {
         // word we are reading is in the cache
-        cout << " word=" << getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr) << " (" <<
-             get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
         // read the word from cache
         return getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr);
     } else {
         // word we are reading is not in the cache, so move that block into the cache
         moveIn(addr);
-        cout << " word=" << getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr) << " (" <<
-             get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
         // read the word from cache
         return getSet(getBlockNumber(addr) % numSets).getBlock(addr).readWord(addr);
     }
@@ -43,7 +37,7 @@ unsigned int Cache::readWordFromCache(unsigned int addr, bool isHit) {
 void Cache::writeWordToCache(unsigned int addr, unsigned int word) {
     // 3 tuple holding addr metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr, memory);
+    tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
     // output
     cout << " word=" << word << " (" <<
          get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
@@ -59,6 +53,7 @@ Set &Cache::getSet(int setNum) {
 void Cache::readWord(unsigned int addr) {
     // 3 tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
     // TODO: This will always hold the wrong tagQueue
     vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
     bool isHit;
@@ -68,12 +63,16 @@ void Cache::readWord(unsigned int addr) {
             sets[getBlockNumber(addr) % numSets].getBlock(addr).getValid()) {
             // Cache hit
             // Read word
+            sets[getBlockNumber(addr) % numSets].updateQueue(addr);
             isHit = true;
             wordRead = readWordFromCache(addr, isHit);
             cout << "hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
+            //TODO: Wrong
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << wordRead;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             for (int & i : tagQueue) {
                 cout << to_string(i) << " ";
@@ -84,14 +83,15 @@ void Cache::readWord(unsigned int addr) {
             // Cache miss
             //write new block into cache, then read from it
             isHit = false;
-            moveIn(addr);
+            sets[getBlockNumber(addr) % numSets].updateQueue(addr);
             wordRead = readWordFromCache(addr, isHit);
             cout << "miss ";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << wordRead;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
-            moveIn(addr);
             cout << "[ ";
             for (int & i : tagQueue) {
                 cout << to_string(i) << " ";
@@ -103,10 +103,12 @@ void Cache::readWord(unsigned int addr) {
 void Cache::writeWord(unsigned int addr, unsigned int word) {
     // Create tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+    tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
     vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
     cout << "write";
     if ((sets[getBlockNumber(addr) % numSets].getBlock(addr).getTag() == get<0>(addrComponents)) &&
         (sets[getBlockNumber(addr) % numSets].getBlock(addr).getValid())) {
+        sets[getBlockNumber(addr) % numSets].updateQueue(addr);
         // Cache hit
         if (isWriteBack) {
             // Write back cache, so write word to cache and set the dirty flag as true
@@ -114,6 +116,8 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << word;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             writeWordToCache(addr, word);
             cout << "[ ";
@@ -127,7 +131,8 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             cout << " hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
-            cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << word;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             writeWordToCache(addr, word);
             cout << "[ ";
@@ -140,13 +145,15 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
     } else {
         // cache miss
         // move the needed block into cache
+        sets[getBlockNumber(addr) % numSets].updateQueue(addr);
         moveIn(addr);
         if (isWriteBack) {
             // if writeback cache, write to cache and set as dirty
             cout << " miss";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
-            cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << word;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             writeWordToCache(addr, word);
             cout << "[ ";
@@ -160,7 +167,8 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             cout << " miss";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
-            cout << " tag=" << get<0>(addrComponents);
+            cout << ": word=" << word;
+            cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             cout << "[ ";
             for (int & i : tagQueue) {
@@ -181,7 +189,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
     // Same logic as on cache hit, just we write block to cache first
 }
 
-tuple<unsigned int, unsigned int> Cache::getBlockRange(unsigned int addr, const Memory &mem) const  {
+tuple<unsigned int, unsigned int> Cache::getBlockRange(unsigned int addr) const  {
     // calculate the first and last mem addresses of a block
     // first mem address of block = address - block offset
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
@@ -196,9 +204,9 @@ void Cache::moveIn(unsigned int addr) {
     // Get which block the needed addr is in
     // Set all values of blocks[0] to the values of the addresses block
     // TODO: Update to deal with writeback caching
-    cout << " replace";
+    //cout << " replace";
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    tuple<unsigned int, unsigned int> blockMemRange = Cache::getBlockRange(addr, memory);
+    tuple<unsigned int, unsigned int> blockMemRange = Cache::getBlockRange(addr);
     /*
      * TODO: Lets optimize this for set associative caches
      * The tag is only used to uniquely identify an address
