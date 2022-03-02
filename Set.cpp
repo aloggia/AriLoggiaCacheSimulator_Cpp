@@ -20,34 +20,93 @@ bool Set::checkTag(int tagToCheck) {
     return tagQueue[0] == tagToCheck;
 }
 Block& Set::getBlock(unsigned int addr) {
-    // Returns a refrence to a specific block
-    // Updates the tag queue when a block is accessesed
-    // Calling this function is equivilent to a block access, so we'll need to update the tag queue
-    // due to principle of locality
-    // The tag queue updating is a bit broken right now though
+    /*
+     * @Inputs: an address
+     * @Return: A block
+     * If set associativity == 0 -> return blocks[0]
+     * ^ this is the edge case of direct mapped cache
+     *
+     * Cases:
+     *  1) empty set -> no blocks in set
+     *     setFilled = false
+     *     blockIsInSet = false
+     *     setEmpty = true;
+     *     return blocks[0]
+     *  2) Some blocks in set, ours not included
+     *      setFilled = false;
+     *      blockIsInSet = false;
+     *      setEmpty = false;
+     *      return the first empty block
+     *  3) Some blocks in set, ours IS included
+     *      setFilled = false
+     *      blockIsInSet = true;
+     *      setEmpty = false;
+     *      return the block we are looking for
+     *  4) All blocks filled, ours NOT included
+     *      setFilled = true;
+     *      blockIsInSet = false;
+     *      setEmpty = false;
+     *      return least recently used block
+     *  5) All blocks filled, ours IN set
+     *      setFilled = true;
+     *      blockIsInSet = true
+     *      setEmpty = false;
+     *      return block we are looking for
+     */
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    int numBlocksInSet = getNumBlocksInSet();
+    bool setFilled = false, blockIsInSet = false, setEmpty = true;
+    int numBlocksInSet = 0;
+    int neededTag = get<0>(addrComponents);
 
-    // TODO: Return the correct block
-    // No blocks in the set, so return the first block
-    if (numBlocksInSet == 0) {
+    //Set all bools to be correct
+    for (auto & i : blocks) {
+        if (i.getTag() != -1) {
+            setEmpty = false;
+            numBlocksInSet += 1;
+        }
+        if (i.getTag() == neededTag) {
+            blockIsInSet = true;
+        }
+    }
+    if (numBlocksInSet == blocks.size()) {
+        setFilled = true;
+    }
+
+    // Choose the correct response to take
+    if (!setFilled && !blockIsInSet && setEmpty) {
+        //empty set -> no blocks in set
         return blocks[0];
-    }
-    // If the block is in the set, return that block
-    int blockToReturnIndex = 0;
-    for (auto & block : blocks) {
-        if (block.getTag() == get<0>(addrComponents)) {
-            return block;
+    } else if (!setFilled && !blockIsInSet && !setEmpty) {
+        // Some blocks in set, ours not included
+        for (auto & block : blocks) {
+            if (block.getTag() == -1) {
+                return block;
+            }
+        }
+    } else if (!setFilled && blockIsInSet && !setEmpty) {
+        // Some blocks in set, ours IS included
+        for (auto & block : blocks) {
+            if (block.getTag() == neededTag) {
+                return block;
+            }
+        }
+    } else if (setFilled && !blockIsInSet && !setEmpty) {
+        // All blocks filled, ours NOT included
+        int neededBlockTag = 0;
+        neededBlockTag = tagQueue[tagQueue.size() - 1];
+        for (auto & block : blocks) {
+            if (block.getTag() == neededBlockTag) {
+                return block;
+            }
+        }
+    } else {
+        // All blocks filled, ours IN set
+        for (auto & block : blocks) {
+            if (block.getTag() == neededTag) {
+                return block;
+            }
         }
     }
-    // If there are blocks in the set, but the one we want is not one of them, return the first empty block
-    for (auto & block : blocks) {
-        if (block.getTag() == -1) {
-            return block;
-        }
-    }
-    // If the set is full, return the oldest block
-    return blocks[tagQueue.size()];
 }
 
 int Set::getNumBlocksInSet() const {
@@ -67,7 +126,7 @@ vector<int> Set::getTagQueue() const {
 int Set::getIndexInSet(unsigned int addr) const {
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
     for (int i = 0; i < blocks.size(); ++i) {
-        if(i == get<1>(addrComponents)) {
+        if(blocks[i].getTag() == get<0>(addrComponents)) {
             return i;
         }
     }
