@@ -68,7 +68,7 @@ void Cache::readWord(unsigned int addr) {
             wordRead = readWordFromCache(addr, isHit);
             cout << "hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            //TODO: Wrong
+            //TODO: Wrong block index
             cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
             cout << " tag=" << get<0>(addrComponents);
             cout << ": word=" << wordRead;
