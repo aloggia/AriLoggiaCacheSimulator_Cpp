@@ -107,6 +107,7 @@ Block& Set::getBlock(unsigned int addr) {
             }
         }
     }
+    return blocks[0];
 }
 
 int Set::getNumBlocksInSet() const {

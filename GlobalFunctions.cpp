@@ -14,7 +14,7 @@ tuple<unsigned int, unsigned int, unsigned int> GlobalFunctions::addressAsTuple(
         int offsetBits = (16 - TAG_LENGTH);
         return make_tuple(extractBits(addr, TAG_LENGTH, offsetBits + 1),
                           0,
-                          extractBits(addr, offsetBits, 0));
+                          extractBits(addr, maxNumBits(BLOCK_SIZE), 0));
     } else {
         int indexBits = maxNumBits(ASSOCIATIVITY);
         int offsetBits = (16 - TAG_LENGTH) - indexBits;

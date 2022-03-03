@@ -242,8 +242,6 @@ tuple<bool, unsigned int, unsigned int> Cache::moveIn(unsigned int addr) {
     } else {
         isEvicting = true;
     }
-    int oldTag = sets[getBlockNumber(addr) % numSets].getBlock(addr).getTag();
-    int tagIndex = sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
     if (sets[getBlockNumber(addr) % numSets].getBlock(addr).getDirty()) {
         for (int i = addr; i < get<1>(blockMemRange); i++) {
             memory.writeByte(i, sets[getBlockNumber(addr) % numSets].getBlock(addr).readByte(i));
