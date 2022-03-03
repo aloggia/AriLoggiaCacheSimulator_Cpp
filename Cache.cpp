@@ -42,7 +42,7 @@ Set &Cache::getSet(int setNum) {
 void Cache::readWord(unsigned int addr) {
     // 3 tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    tuple<bool, int, int, unsigned int, unsigned int> blockEjectionComponents;
+    tuple<bool, unsigned int, unsigned int> blockEjectionComponents;
     tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
     int wordRead = 0;
     cout << "read ";
@@ -54,7 +54,7 @@ void Cache::readWord(unsigned int addr) {
             wordRead = readWordFromCache(addr);
             cout << "hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(get<0>(addrComponents));
             cout << " tag=" << get<0>(addrComponents);
             cout << ": word=" << wordRead;
             cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
@@ -69,6 +69,12 @@ void Cache::readWord(unsigned int addr) {
         } else {
             // Cache miss
             //write new block into cache, then read from it
+            //TODO: change blockIndexBeingEjected to return the correct block
+            // RN it is taking in the wrong address to look for
+            vector<int> oldTagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
+            int tagBeingEjected = oldTagQueue[oldTagQueue.size() - 1];
+            int blockIndexBeingEjected = sets[getBlockNumber(addr) % numSets].getIndexInSet(tagBeingEjected);
+
             sets[getBlockNumber(addr) % numSets].updateQueue(addr);
             blockEjectionComponents = moveIn(addr);
             wordRead = readWordFromCache(addr);
@@ -77,15 +83,15 @@ void Cache::readWord(unsigned int addr) {
                 cout << "+ replace ";
             }
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(get<0>(addrComponents));
             cout << " tag=" << get<0>(addrComponents);
             cout << ": word=" << wordRead;
             cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
             if (get<0>(blockEjectionComponents)) {
                 // Block got ejected, so we want to print out info about the ejected block
-                cout << "evict tag " << get<1>(blockEjectionComponents) << " in block_index " << get<2>(blockEjectionComponents) << endl;
-                cout << "read in (" << get<3>(blockEjectionComponents) << " - " << get<4>(blockEjectionComponents) << ")" << endl;
+                cout << "evict tag " << tagBeingEjected << " in block_index " << blockIndexBeingEjected << endl;
+                cout << "read in (" << get<1>(blockEjectionComponents) << " - " << get<2>(blockEjectionComponents) << ")" << endl;
             }
             cout << "[ ";
             vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
@@ -99,7 +105,7 @@ void Cache::readWord(unsigned int addr) {
 void Cache::writeWord(unsigned int addr, unsigned int word) {
     // Create tuple to hold address metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    tuple<bool, int, int, unsigned int, unsigned int> blockEjectionComponents;
+    tuple<bool, unsigned int, unsigned int> blockEjectionComponents;
     tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
     cout << "write";
     if ((sets[getBlockNumber(addr) % numSets].getBlock(addr).getTag() == get<0>(addrComponents)) &&
@@ -110,7 +116,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // Write back cache, so write word to cache and set the dirty flag as true
             cout << " hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(get<0>(addrComponents));
             cout << " tag=" << get<0>(addrComponents);
             cout << ": word=" << word;
             cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
@@ -127,7 +133,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             // Write through cache, write to block and memory
             cout << " hit";
             cout << "[addr=" << addr << " index=" << get<1>(addrComponents);
-            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(addr);
+            cout << " block_index=" << sets[getBlockNumber(addr) % numSets].getIndexInSet(get<0>(addrComponents));
             cout << ": word=" << word;
             cout << " (" << get<0>(blockRange) << " - " << get<1>(blockRange) << ")";
             cout << "]" << endl;
@@ -143,6 +149,9 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
     } else {
         // cache miss
         // move the needed block into cache
+        vector<int> oldTagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
+        int tagBeingEjected = oldTagQueue[oldTagQueue.size() - 1];
+        int blockIndexBeingEjected = sets[getBlockNumber(addr) % numSets].getIndexInSet(tagBeingEjected);
         sets[getBlockNumber(addr) % numSets].updateQueue(addr);
         blockEjectionComponents = moveIn(addr);
         if (isWriteBack) {
@@ -159,8 +168,8 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             writeWordToCache(addr, word);
             if (get<0>(blockEjectionComponents)) {
                 // Block got ejected, so we want to print out info about the ejected block
-                cout << "evict tag " << get<1>(blockEjectionComponents) << " in block_index " << get<2>(blockEjectionComponents) << endl;
-                cout << "read in (" << get<3>(blockEjectionComponents) << " - " << get<4>(blockEjectionComponents) << ")" << endl;
+                cout << "evict tag " << tagBeingEjected << " in block_index " << blockIndexBeingEjected << endl;
+                cout << "read in (" << get<1>(blockEjectionComponents) << " - " << get<2>(blockEjectionComponents) << ")" << endl;
             }
             cout << "[ ";
             vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
@@ -183,8 +192,8 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             cout << "[ ";
             if (get<0>(blockEjectionComponents)) {
                 // Block got ejected, so we want to print out info about the ejected block
-                cout << "evict tag " << get<1>(blockEjectionComponents) << " in block_index " << get<2>(blockEjectionComponents) << endl;
-                cout << "read in (" << get<3>(blockEjectionComponents) << " - " << get<4>(blockEjectionComponents) << ")" << endl;
+                cout << "evict tag " << tagBeingEjected << " in block_index " << blockIndexBeingEjected << endl;
+                cout << "read in (" << get<1>(blockEjectionComponents) << " - " << get<2>(blockEjectionComponents) << ")" << endl;
             }
             vector<int> tagQueue = sets[getBlockNumber(addr) % numSets].getTagQueue();
             for (int & i : tagQueue) {
@@ -215,8 +224,8 @@ tuple<unsigned int, unsigned int> Cache::getBlockRange(unsigned int addr) const 
     return make_tuple(startOfBlock, endOfBlock);
 }
 
-tuple<bool, int, int, unsigned int, unsigned int> Cache::moveIn(unsigned int addr) {
-    // Return Tuple is of the form (isEvicting, oldTag, tagIndex, newRangeStart, newRangeEnd)
+tuple<bool, unsigned int, unsigned int> Cache::moveIn(unsigned int addr) {
+    // Return Tuple is of the form (isEvicting, newRangeStart, newRangeEnd)
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
     tuple<unsigned int, unsigned int> blockMemRange = Cache::getBlockRange(addr);
     /*
@@ -246,7 +255,7 @@ tuple<bool, int, int, unsigned int, unsigned int> Cache::moveIn(unsigned int add
     for (int i = addr; i < get<1>(blockMemRange); i++) {
         sets[getBlockNumber(addr) % numSets].getBlock(addr).writeByte(i, memory.readByte(i));
     }
-    return make_tuple(isEvicting, oldTag, tagIndex, get<0>(blockMemRange), get<1>(blockMemRange));
+    return make_tuple(isEvicting, get<0>(blockMemRange), get<1>(blockMemRange));
 }
 
 int Cache::getBlockNumber(unsigned int addr) const {

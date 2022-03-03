@@ -28,7 +28,7 @@ public:
 
     int getNumBlocksInSet() const;
 
-    int getIndexInSet(unsigned int addr) const;
+    int getIndexInSet(unsigned int tag) const;
 
     vector<int> getTagQueue() const;
 

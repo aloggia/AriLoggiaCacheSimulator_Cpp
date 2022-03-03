@@ -123,10 +123,9 @@ vector<int> Set::getTagQueue() const {
     return tagQueue;
 }
 
-int Set::getIndexInSet(unsigned int addr) const {
-    tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
+int Set::getIndexInSet(unsigned int tag) const {
     for (int i = 0; i < blocks.size(); ++i) {
-        if(blocks[i].getTag() == get<0>(addrComponents)) {
+        if(blocks[i].getTag() == tag) {
             return i;
         }
     }
