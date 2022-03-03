@@ -111,6 +111,7 @@ Block& Set::getBlock(unsigned int addr) {
 }
 
 int Set::getNumBlocksInSet() const {
+    // Loop through the set, if a block has a valid tag, then increase the counter
     int numOfEmptyBlocks = 0;
     for (auto & i : blocks) {
         if (i.getTag() == -1) {
@@ -121,10 +122,13 @@ int Set::getNumBlocksInSet() const {
 }
 
 vector<int> Set::getTagQueue() const {
+    // Return the tag queue vector
     return tagQueue;
 }
 
 int Set::getIndexInSet(unsigned int tag) const {
+    // Take in a tag, and loop through the blocks until we find our tag
+    // Then return the index of the block we found
     for (int i = 0; i < blocks.size(); ++i) {
         if(blocks[i].getTag() == tag) {
             return i;
@@ -134,14 +138,15 @@ int Set::getIndexInSet(unsigned int tag) const {
 
 void Set::updateQueue(unsigned int addr) {
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
-    int numBlocksInSet = getNumBlocksInSet();
     bool containsBlocks = false;
     bool blockIsInSet = false;
     int blockInQueueIndex = 0;
 
-    if (numBlocksInSet != 0) {
+    // check to see if a set contains any blocks
+    if (getNumBlocksInSet() != 0) {
         containsBlocks = true;
     }
+    // Check to see if the block we are updating is already in the set
     for (int i = 0; i < tagQueue.size(); ++i) {
         if (tagQueue[i] == get<0>(addrComponents)) {
             blockIsInSet = true;
@@ -153,7 +158,7 @@ void Set::updateQueue(unsigned int addr) {
         tagQueue.pop_back();
         tagQueue.insert(tagQueue.begin(), get<0>(addrComponents));
     }
-    else if (numBlocksInSet == tagQueue.size()) {
+    else if (getNumBlocksInSet() == tagQueue.size()) {
         // Edge case of full set
         if (blockIsInSet) {
             // Block is in the set, so erase that block from tagQueue and push it onto tag queue at index 0
