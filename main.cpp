@@ -20,7 +20,7 @@ int main() {
     CACHE_SIZE = 1024;
     BLOCK_SIZE = 64;
     ASSOCIATIVITY = 4;
-    WRITE_BACK = false;
+    WRITE_BACK = true;
     TAG_LENGTH = 8;
 
     Cache cache;
@@ -55,11 +55,6 @@ int main() {
     cache.writeWord(8320, 7);
 
     cache.readWord(8324);
-
-
-
-
-
 
 
     return 0;

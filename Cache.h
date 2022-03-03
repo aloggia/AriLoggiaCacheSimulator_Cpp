@@ -27,7 +27,7 @@ private:
 public:
     Cache();
 
-    unsigned int readWordFromCache(unsigned int addr, bool isHit);
+    unsigned int readWordFromCache(unsigned int addr);
 
     void writeWordToCache(unsigned int addr, unsigned int word);
 
@@ -39,7 +39,7 @@ public:
 
     [[nodiscard]] tuple<unsigned int, unsigned int> getBlockRange(unsigned int addr) const;
 
-    void moveIn(unsigned int addr);
+    tuple<bool, int, int, unsigned int, unsigned int> moveIn(unsigned int addr);
 
     [[nodiscard]] int getBlockNumber(unsigned int addr) const;
 

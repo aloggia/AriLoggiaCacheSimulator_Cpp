@@ -7,7 +7,7 @@
 Block::Block() {
     tag = -1;
     mem.reserve(BLOCK_SIZE);
-    isDirty = true;
+    isDirty = false;
     isValid = false;
 }
 
