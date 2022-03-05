@@ -9,7 +9,6 @@ Cache::Cache() {
     numBlocks = CACHE_SIZE / BLOCK_SIZE;
     numSets = numBlocks / ASSOCIATIVITY;
     this->blockSize = BLOCK_SIZE;
-    this->numSets = numSets;
     isWriteBack = WRITE_BACK;
     memory = Memory();
     for (int i = 0; i < numSets; i++) {
@@ -27,9 +26,6 @@ void Cache::writeWordToCache(unsigned int addr, unsigned int word) {
     // 3 tuple holding addr metadata
     tuple<unsigned int, unsigned int, unsigned int> addrComponents = GlobalFunctions::addressAsTuple(addr);
     tuple<unsigned int, unsigned int> blockRange = getBlockRange(addr);
-    // output
-    cout << " word=" << word << " (" <<
-         get<0>(blockRange) << "-" << get<1>(blockRange) << ")]" << endl;
     // write the word to cache
     getSet(getBlockNumber(addr) % numSets).getBlock(addr).writeWord(addr, word);
 }
@@ -169,7 +165,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
         blockEjectionComponents = moveIn(addr);
         if (isWriteBack) {
             // if writeback cache, write to cache and set as dirty
-            cout << " miss";
+            cout << " miss ";
             if (get<0>(blockEjectionComponents)) {
                 cout << "+ replace ";
             }
@@ -180,6 +176,7 @@ void Cache::writeWord(unsigned int addr, unsigned int word) {
             cout << "]" << endl;
             //write our word to cache
             writeWordToCache(addr, word);
+            //TODO: block_index doesn't return the correct value
             if (get<0>(blockEjectionComponents)) {
                 // Block got ejected, so we want to print out info about the ejected block
                 cout << "evict tag " << tagBeingEjected << " in block_index " << blockIndexBeingEjected << endl;

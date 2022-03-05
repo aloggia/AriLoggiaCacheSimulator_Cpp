@@ -19,9 +19,9 @@ int main() {
     // Set values of global variables
     CACHE_SIZE = 1024;
     BLOCK_SIZE = 64;
-    ASSOCIATIVITY = 4;
+    ASSOCIATIVITY = 2;
     WRITE_BACK = true;
-    TAG_LENGTH = 8;
+    TAG_LENGTH = 7;
 
     Cache cache;
 
